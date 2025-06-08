@@ -20,26 +20,26 @@ public class Message implements Serializable {
         this.vectorClock = Map.copyOf(vectorClock);
     }
 
-    // public byte[] serialize() {
-    //     try {
-    //         ByteArrayOutputStream baos = new ByteArrayOutputStream();
-    //         ObjectOutputStream oos = new ObjectOutputStream(baos);
-    //         oos.writeObject(this);
-    //         oos.close();
-    //         return baos.toByteArray();
-    //     } catch (IOException e) {
-    //         throw new RuntimeException("Falha na serialização", e);
-    //     }
-    // }
+    public byte[] serialize() {
+        try {
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            ObjectOutputStream oos = new ObjectOutputStream(baos);
+            oos.writeObject(this);
+            oos.close();
+            return baos.toByteArray();
+        } catch (IOException e) {
+            throw new RuntimeException("Falha na serialização", e);
+        }
+    }
     
-    // public static Message deserialize(byte[] data) {
-    //     try {
-    //         ObjectInputStream ois = new ObjectInputStream(new ByteArrayInputStream(data));
-    //         return (Message) ois.readObject();
-    //     } catch (IOException | ClassNotFoundException e) {
-    //         throw new RuntimeException("Falha na desserialização", e);
-    //     }
-    // }
+    public static Message deserialize(byte[] data) {
+        try {
+            ObjectInputStream ois = new ObjectInputStream(new ByteArrayInputStream(data));
+            return (Message) ois.readObject();
+        } catch (IOException | ClassNotFoundException e) {
+            throw new RuntimeException("Falha na desserialização", e);
+        }
+    }
     
     public String getContent() { return content; }
     public String getSenderId() { return senderId; }
