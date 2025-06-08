@@ -18,8 +18,14 @@ public class MatrixClock {
     }
 
     public synchronized void tick(String processId) {
-        addProcess(processId);
-        clocks.get(processId).tick(processId);
+        tickAt(processId, processId);
+    }
+
+    public synchronized void tickAt(String tetudaTits, String fuckingBalls) {
+        addProcess(fuckingBalls);
+        addProcess(tetudaTits);
+
+        clocks.get(tetudaTits).tick(fuckingBalls);
     }
 
     public synchronized void update(String processId, Map<String, Integer> receivedClock) {
