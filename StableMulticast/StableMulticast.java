@@ -8,18 +8,21 @@ import java.util.Map;
 
 
 public class StableMulticast {
+    private final String multicastGroupIP = "10.0.0.1";
+    private final int multicastPort = 123;
+
     private IStableMulticast client;
     private String id;
-    private List<Integer> grupo = new ArrayList(); // pra que serve isso?
+
+    private List<Integer> grupo = new ArrayList<Integer>();
+    private ArrayList<Message> messageBuffer = new ArrayList<Message>();
+    private MatrixClock matrix = new MatrixClock();
     
-    private MatrixClock matrix;
-    private ArrayList<Message> messageBuffer;
 
     public StableMulticast(String multicastIP, Integer multicastPort, IStableMulticast client) {
         this.client = client;
         this.id = multicastIP + ":" + multicastPort.toString(); // talvez seja melhor pega o IP do localhost
 
-        this.matrix = new MatrixClock();
 
         // Thread de descoberta
         new Thread(() -> escutarMulticast(multicastIP, multicastPort)).start();
@@ -34,6 +37,12 @@ public class StableMulticast {
     public void msend(String msg, IStableMulticast client) {
         Map<String,Integer> vec = matrix.getVector(this.id);
         Message m = new Message(msg, this.id, vec);
+
+        //TODO
+            //Checar se o usuário quer enviar para todos os membros
+                //Se sim, multicast
+                //Senão, abrir diálogo para seleção de targets
+        
         // Envia via unicast para todos da lista grupo
     }
 

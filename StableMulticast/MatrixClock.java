@@ -2,58 +2,46 @@ package StableMulticast;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
-
 
 public class MatrixClock {
-    private final ConcurrentMap<String, ConcurrentMap<String, Integer>> matrix;
+    private final Map<String, VectorClock> clocks;
 
     public MatrixClock() {
-        this.matrix = new ConcurrentHashMap<>();
+        this.clocks = new ConcurrentHashMap<>();
     }
 
-    public synchronized void update(String nodeId, Map<String, Integer> vectorClock) {
-        matrix.putIfAbsent(nodeId, new ConcurrentHashMap<>());
-        
-        vectorClock.forEach((senderId, clockValue) -> {
-            matrix.get(nodeId).put(senderId, clockValue);
-        });
+    public synchronized void addProcess(String processId) {
+        clocks.putIfAbsent(processId, new VectorClock());
+        for (VectorClock vc : clocks.values()) {
+            vc.vecAddProcess(processId);
+        }
     }
 
-    public synchronized int getMinForNode(String nodeId) {
-        return matrix.values().stream()
-            .mapToInt(nodeClock -> nodeClock.getOrDefault(nodeId, 0))
-            .min()
-            .orElse(0);
+    public synchronized void tick(String processId) {
+        addProcess(processId);
+        clocks.get(processId).tick(processId);
     }
 
-    public synchronized void increment(String nodeId, String senderId) {
-        matrix.putIfAbsent(nodeId, new ConcurrentHashMap<>());
-        matrix.get(nodeId).merge(senderId, 1, Integer::sum);
+    public synchronized void update(String processId, Map<String, Integer> receivedClock) {
+        addProcess(processId);
+        clocks.get(processId).update(receivedClock);
     }
 
-    public synchronized Map<String, Map<String, Integer>> getMatrix() {
-        Map<String, Map<String, Integer>> copy = new ConcurrentHashMap<>();
-        matrix.forEach((nodeId, nodeClock) -> {
-            copy.put(nodeId, new ConcurrentHashMap<>(nodeClock));
-        });
-        return copy;
+    public synchronized Map<String, Integer> getVector(String processId) {
+        addProcess(processId);
+        return clocks.get(processId).copy();
     }
 
-    public synchronized Map<String, Integer> getVector(String nodeId) {
-        return matrix.get(nodeId);
+    public synchronized boolean isReadyToDeliver(String localProcessId, Message m) {
+        addProcess(localProcessId);
+        return clocks.get(localProcessId).isReadyToDeliver(m);
     }
 
-    public synchronized void addNode(String nodeId) {
-        matrix.putIfAbsent(nodeId, new ConcurrentHashMap<>());
-    }
-
-    public synchronized void removeNode(String nodeId) {
-        matrix.remove(nodeId);
-        matrix.values().forEach(nodeClock -> nodeClock.remove(nodeId));
-    }
-
-    public void Main() {
-        
+    public synchronized String prettyPrint() {
+        StringBuilder sb = new StringBuilder();
+        for (Map.Entry<String, VectorClock> entry : clocks.entrySet()) {
+            sb.append(entry.getKey()).append(" => ").append(entry.getValue().toString()).append("\n");
+        }
+        return sb.toString();
     }
 }
