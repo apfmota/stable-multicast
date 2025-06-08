@@ -10,7 +10,7 @@ import java.util.Map;
 import java.util.Scanner;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-
+import java.util.Iterator;
 
 public class StableMulticast {
     private final String multicastGroupIP = "10.0.0.1";
@@ -99,9 +99,12 @@ public class StableMulticast {
     }
 
     private void deliverMessages() {
-        for (Message m : messageBuffer) {
+        Iterator<Message> it = messageBuffer.iterator();
+        while (it.hasNext()) {
+            Message m = it.next();
             if(matrix.isReadyToDeliver(this.id, m)){
                 client.deliver(m.getContent());
+                it.remove();
             }
         }
     }
