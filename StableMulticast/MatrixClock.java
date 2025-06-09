@@ -1,5 +1,7 @@
 package StableMulticast;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -45,9 +47,26 @@ public class MatrixClock {
 
     public synchronized String prettyPrint() {
         StringBuilder sb = new StringBuilder();
-        for (Map.Entry<String, VectorClock> entry : clocks.entrySet()) {
-            sb.append(entry.getKey()).append(" => ").append(entry.getValue().toString()).append("\n");
+        List<String> processos = new ArrayList<>(clocks.keySet());
+        processos.sort(String::compareTo); // ordena para manter consistência
+
+        // Cabeçalho
+        sb.append(String.format("%20s", ""));
+        for (String col : processos) {
+            sb.append(String.format("%15s", col));
         }
+        sb.append("\n");
+
+        // Linhas
+        for (String row : processos) {
+            sb.append(String.format("%20s", row));
+            for (String col : processos) {
+                int valor = clocks.getOrDefault(row, new VectorClock()).getVectorClock().getOrDefault(col, 0);
+                sb.append(String.format("%15d", valor));
+            }
+            sb.append("\n");
+        }
+
         return sb.toString();
     }
 }

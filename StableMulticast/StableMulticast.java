@@ -137,10 +137,10 @@ public class StableMulticast {
 
                 if(!senderId.equals(id)) {
                     matrix.tickAt(id, senderId);
-                    // matrix.update(id, receivedVC); 
                 }
 
                 deliverMessages(); //Tenta enviar as mensagens prontas para o client
+                debugPrint();
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -165,17 +165,26 @@ public class StableMulticast {
         }
     }
 
-    private void deliverMessages() {
-        System.out.println("matriz atual");
+    private void debugPrint() {
+        System.out.println("\n--ID Local--");
+        System.out.println(this.id); 
+        System.out.println("\n--Matriz Atual--");
         System.out.println(this.matrix.prettyPrint()); 
+        System.out.println("--Buffer de Mensagens--");
+        
+        for (Message m : messageBuffer){
+            System.out.println(m.getSenderId() + ": " + m.getContent()); 
+        }
+        System.out.println("\n\n\n");
+    }
+
+    private void deliverMessages() {
         Iterator<Message> it = messageBuffer.iterator();
         while (it.hasNext()) {
             Message m = it.next();
             if(matrix.isReadyToDeliver(this.id, m)){
-                client.deliver(m.getContent());
+                client.deliver(m.getSenderId() + ": " + m.getContent());
                 it.remove();
-            }else{ //TODO remover esta linha
-                System.out.println("nao está pronta ainda");
             }
         }
     }

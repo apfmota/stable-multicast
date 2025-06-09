@@ -53,6 +53,10 @@ public class VectorClock {
         clock.putIfAbsent(processId, 0);
     }
 
+    public synchronized Map<String, Integer> getVectorClock(){
+        return clock;
+    }
+
     @Override
     public synchronized String toString() {
         return clock.toString();
