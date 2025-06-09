@@ -34,7 +34,7 @@ public class VectorClock {
             Integer receivedTime = entry.getValue();
             Integer localTime = clock.getOrDefault(pId, 0);
 
-            if (pId.equals(senderId) && receivedTime != localTime + 1) {
+            if (pId.equals(senderId) && receivedTime + 1 != localTime) {
                 // Se a mensagem que eu recebi do sender não for a mensagem imediatamente em sequência à última mensagem que eu li
                 return false;
             } else if (receivedTime > localTime){

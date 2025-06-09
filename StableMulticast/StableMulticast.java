@@ -140,7 +140,6 @@ public class StableMulticast {
                     // matrix.update(id, receivedVC); 
                 }
 
-                client.deliver("mensagem recebida (sem middleware)" + m.getContent()); //TODO: linha a ser removida (debug se a mensagem chegou)
                 deliverMessages(); //Tenta enviar as mensagens prontas para o client
             }
         } catch (IOException e) {
