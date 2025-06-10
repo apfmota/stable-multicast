@@ -46,7 +46,7 @@ public class StableMulticast {
         new Thread(() -> enviarPresencaPeriodicamente(ip, port)).start();
     }
 
-    public void msend(String msg, IStableMulticast client) {
+    public  synchronized void msend(String msg, IStableMulticast client) {
         Map<String,Integer> vec = matrix.getVector(this.id);
         Message m = new Message(msg, this.id, vec);
 
@@ -77,7 +77,8 @@ public class StableMulticast {
                 new Thread(() -> sendDelayed(delayed, m)).start();
             }
         }
-        matrix.tick(this.id);
+        
+        this.matrix.tickAt(this.id, this.id);
     }
 
     private void sendDelayed(List<String> dests, Message m) {
@@ -157,7 +158,9 @@ public class StableMulticast {
                     matrix.tickAt(id, senderId);
                 }
 
-                deliverMessages(); //Tenta enviar as mensagens prontas para o client
+                this.client.deliver(m.getSenderId() + ": " + m.getContent());
+                //deliverMessages(); //Tenta enviar as mensagens prontas para o client
+                bufferClear();
                 debugPrint();
             }
         } catch (IOException e) {
@@ -196,14 +199,26 @@ public class StableMulticast {
         System.out.println("\n\n\n");
     }
 
-    private void deliverMessages() {
+    private void bufferClear() {
         Iterator<Message> it = messageBuffer.iterator();
         while (it.hasNext()) {
             Message m = it.next();
-            if(matrix.isReadyToDeliver(this.id, m)){
-                client.deliver(m.getSenderId() + ": " + m.getContent());
+            if(matrix.canDrop(this.id, m)){
+                System.out.println("drop: " + m.getContent());
                 it.remove();
             }
         }
     }
+
+// implementava causalidade (provavelmente errado)
+    // private void deliverMessages() {
+    //     Iterator<Message> it = messageBuffer.iterator();
+    //     while (it.hasNext()) {
+    //         Message m = it.next();
+    //         if(matrix.isReadyToDeliver(this.id, m)){
+    //             client.deliver(m.getSenderId() + ": " + m.getContent());
+    //             it.remove();
+    //         }
+    //     }
+    // }
 }

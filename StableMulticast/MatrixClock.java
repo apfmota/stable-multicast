@@ -23,16 +23,17 @@ public class MatrixClock {
         tickAt(processId, processId);
     }
 
-    public synchronized void tickAt(String tetudaTits, String fuckingBalls) {
-        addProcess(fuckingBalls);
-        addProcess(tetudaTits);
+    public synchronized void tickAt(String local, String target) {
+        addProcess(target);
+        addProcess(local);
 
-        clocks.get(tetudaTits).tick(fuckingBalls);
-    }
+        clocks.get(local).tick(target);
+}
 
     public synchronized void update(String processId, Map<String, Integer> receivedClock) {
         addProcess(processId);
-        clocks.get(processId).update(receivedClock);
+        clocks.replace(processId, new VectorClock(receivedClock));
+        // clocks.get(processId).update(receivedClock);
     }
 
     public synchronized Map<String, Integer> getVector(String processId) {
@@ -43,6 +44,23 @@ public class MatrixClock {
     public synchronized boolean isReadyToDeliver(String localProcessId, Message m) {
         addProcess(localProcessId);
         return clocks.get(localProcessId).isReadyToDeliver(m);
+    }
+
+
+    public synchronized boolean canDrop(String localProcessId, Message m) {
+        addProcess(localProcessId);
+
+        int min = Integer.MAX_VALUE;
+        String sender = m.getSenderId();
+
+        for (VectorClock vc : clocks.values()) {
+            int lastSeen = vc.getVectorClock().getOrDefault(sender, -1);
+            if(lastSeen < min) {
+                min = lastSeen;
+            }
+        }
+
+        return m.getVectorClock().get(sender) <= min;
     }
 
     public synchronized String prettyPrint() {

@@ -12,6 +12,10 @@ public class VectorClock {
         this.clock = new HashMap<>();
     }
 
+    public VectorClock(Map<String,Integer> s) {
+        this.clock = new HashMap<>(s);
+    }
+
     public synchronized void tick(String processId) {
         clock.put(processId, clock.getOrDefault(processId, 0) + 1);
     }
