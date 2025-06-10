@@ -165,9 +165,8 @@ public class StableMulticast {
                     matrix.setNewClock(senderId, receivedVC);
                 }
 
-                // this.client.deliver(m.getSenderId() + ": " + m.getContent());
-                deliverMessages(); //Tenta enviar as mensagens prontas para o client
-                
+                this.client.deliver(m.getSenderId() + ": " + m.getContent());
+                //deliverMessages(); //Tenta enviar as mensagens prontas para o client
                 bufferClear();
                 debugPrint();
             }

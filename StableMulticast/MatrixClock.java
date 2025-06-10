@@ -50,7 +50,6 @@ public class MatrixClock {
         return clocks.get(localProcessId).isReadyToDeliver(m);
     }
 
-
     public synchronized boolean canDrop(String localProcessId, Message m) {
         addProcess(localProcessId);
 
@@ -70,7 +69,7 @@ public class MatrixClock {
     public synchronized String prettyPrint() {
         StringBuilder sb = new StringBuilder();
         List<String> processos = new ArrayList<>(clocks.keySet());
-        processos.sort(String::compareTo); // ordena para manter consistência
+        processos.sort(String::compareTo);
 
         // Cabeçalho
         sb.append(String.format("%20s", ""));
