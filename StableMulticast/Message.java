@@ -13,11 +13,13 @@ public class Message implements Serializable {
     private final String content;
     private final String senderId;
     private final Map<String, Integer> vectorClock;
+    public boolean delivered;
     
     public Message(String content, String sender, Map<String, Integer> vectorClock) {
         this.content = Objects.requireNonNull(content);
         this.senderId = Objects.requireNonNull(sender);
         this.vectorClock = Map.copyOf(vectorClock);
+        this.delivered = false;
     }
 
     public byte[] serialize() {

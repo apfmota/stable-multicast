@@ -52,7 +52,8 @@ public class StableMulticast {
         Message m = new Message(msg, this.id, vec);
 
         if(m.getContent().equalsIgnoreCase("matrix")){
-            System.out.println(this.matrix.prettyPrint());
+            // System.out.println(this.matrix.prettyPrint());
+            debugPrint();
             return;
         }
 
@@ -164,8 +165,9 @@ public class StableMulticast {
                     matrix.setNewClock(senderId, receivedVC);
                 }
 
-                this.client.deliver(m.getSenderId() + ": " + m.getContent());
-                //deliverMessages(); //Tenta enviar as mensagens prontas para o client
+                // this.client.deliver(m.getSenderId() + ": " + m.getContent());
+                deliverMessages(); //Tenta enviar as mensagens prontas para o client
+                
                 bufferClear();
                 debugPrint();
             }
@@ -200,7 +202,7 @@ public class StableMulticast {
         System.out.println("--Buffer de Mensagens--");
         
         for (Message m : messageBuffer){
-            System.out.println(m.getSenderId() + ": " + m.getContent()); 
+            System.out.println(m.getSenderId() + ": " + m.getContent() + ": " + m.delivered); 
         }
         System.out.println("\n\n\n");
     }
@@ -217,14 +219,14 @@ public class StableMulticast {
     }
 
 // implementava causalidade (provavelmente errado)
-    // private void deliverMessages() {
-    //     Iterator<Message> it = messageBuffer.iterator();
-    //     while (it.hasNext()) {
-    //         Message m = it.next();
-    //         if(matrix.isReadyToDeliver(this.id, m)){
-    //             client.deliver(m.getSenderId() + ": " + m.getContent());
-    //             it.remove();
-    //         }
-    //     }
-    // }
+    private void deliverMessages() {
+        Iterator<Message> it = messageBuffer.iterator();
+        while (it.hasNext()) {
+            Message m = it.next();
+            if(matrix.isReadyToDeliver(this.id, m) && m.delivered == false){
+                client.deliver(m.getSenderId() + ": " + m.getContent());
+                m.delivered = true;
+            }
+        }
+    }
 }
