@@ -32,8 +32,12 @@ public class MatrixClock {
 
     public synchronized void update(String processId, Map<String, Integer> receivedClock) {
         addProcess(processId);
+        clocks.get(processId).update(receivedClock);
+    }
+
+    public synchronized void setNewClock(String processId,  Map<String, Integer> receivedClock){
+        addProcess(processId);
         clocks.replace(processId, new VectorClock(receivedClock));
-        // clocks.get(processId).update(receivedClock);
     }
 
     public synchronized Map<String, Integer> getVector(String processId) {
@@ -79,7 +83,7 @@ public class MatrixClock {
         for (String row : processos) {
             sb.append(String.format("%20s", row));
             for (String col : processos) {
-                int valor = clocks.getOrDefault(row, new VectorClock()).getVectorClock().getOrDefault(col, 0);
+                int valor = clocks.getOrDefault(row, new VectorClock()).getVectorClock().getOrDefault(col, -1);
                 sb.append(String.format("%15d", valor));
             }
             sb.append("\n");

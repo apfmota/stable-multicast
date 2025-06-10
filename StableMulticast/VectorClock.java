@@ -17,14 +17,14 @@ public class VectorClock {
     }
 
     public synchronized void tick(String processId) {
-        clock.put(processId, clock.getOrDefault(processId, 0) + 1);
+        clock.put(processId, clock.getOrDefault(processId, -1) + 1);
     }
 
     public synchronized void update(Map<String, Integer> receivedClock) {
         for (Map.Entry<String, Integer> entry : receivedClock.entrySet()) {
             String pId = entry.getKey();
             Integer receivedTime = entry.getValue();
-            Integer currentTime = clock.getOrDefault(pId, 0);
+            Integer currentTime = clock.getOrDefault(pId, -1);
             clock.put(pId, Math.max(currentTime, receivedTime));
         }
     }
@@ -36,7 +36,7 @@ public class VectorClock {
         for (Map.Entry<String, Integer> entry : msgClock.entrySet()) {
             String pId = entry.getKey();
             Integer receivedTime = entry.getValue();
-            Integer localTime = clock.getOrDefault(pId, 0);
+            Integer localTime = clock.getOrDefault(pId, -1);
 
             if (pId.equals(senderId) && receivedTime + 1 != localTime) {
                 // Se a mensagem que eu recebi do sender não for a mensagem imediatamente em sequência à última mensagem que eu li
@@ -54,7 +54,7 @@ public class VectorClock {
     }
 
     public synchronized void vecAddProcess(String processId) {
-        clock.putIfAbsent(processId, 0);
+        clock.putIfAbsent(processId, -1);
     }
 
     public synchronized Map<String, Integer> getVectorClock(){

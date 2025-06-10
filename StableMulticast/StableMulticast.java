@@ -35,6 +35,7 @@ public class StableMulticast {
 
         groupMembers.add(id);
         matrix.addProcess(id);
+        matrix.tick(id);
 
         // Thread de descoberta
         new Thread(() -> escutarMulticast(ip, port)).start();
@@ -46,16 +47,21 @@ public class StableMulticast {
         new Thread(() -> enviarPresencaPeriodicamente(ip, port)).start();
     }
 
-    public  synchronized void msend(String msg, IStableMulticast client) {
+    public synchronized void msend(String msg, IStableMulticast client) {
         Map<String,Integer> vec = matrix.getVector(this.id);
         Message m = new Message(msg, this.id, vec);
+
+        if(m.getContent().equalsIgnoreCase("matrix")){
+            System.out.println(this.matrix.prettyPrint());
+            return;
+        }
 
         List<String> targets = new ArrayList<String>(groupMembers);
 
         Scanner scanner = new Scanner(System.in);
         System.out.println("Enviar mensagem para todos? (s/n)");
         String userInput = scanner.nextLine();
-
+        
         if(userInput.equalsIgnoreCase("s")) {
             for (String target : targets ) {
                 sendMessage(target, m);
@@ -148,14 +154,14 @@ public class StableMulticast {
                 socket.receive(packet);
 
                 Message m = Message.deserialize(packet.getData());
-                messageBuffer.add(m);
                 String senderId = m.getSenderId();
                 Map<String, Integer> receivedVC = m.getVectorClock();
-
-                matrix.update(senderId, receivedVC);
-
-                if(!senderId.equals(id)) {
+                
+                messageBuffer.add(m);
+                
+                if(!senderId.equals(id)){
                     matrix.tickAt(id, senderId);
+                    matrix.setNewClock(senderId, receivedVC);
                 }
 
                 this.client.deliver(m.getSenderId() + ": " + m.getContent());
