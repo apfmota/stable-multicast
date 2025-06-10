@@ -61,17 +61,35 @@ public class StableMulticast {
                 sendMessage(target, m);
             }
         } else {
+            List<String> delayed = new ArrayList<String>();
             for (String target : targets) {
-                System.out.println("Enviar para " + target + "? (s/n/q)");
+                System.out.println("Enviar para " + target + "? ([S]im/[N]ão/[D]elay]/[Q]uit)");
                 String r = scanner.nextLine();
                 if (r.equalsIgnoreCase("s")) {
                     sendMessage(target, m);
                 } else if (r.equalsIgnoreCase("q")) {
                     break;
+                } else if (r.equalsIgnoreCase("d")) {
+                    delayed.add(target);
                 }
+            }
+            if (!delayed.isEmpty()) {
+                new Thread(() -> sendDelayed(delayed, m)).start();
             }
         }
         matrix.tick(this.id);
+    }
+
+    private void sendDelayed(List<String> dests, Message m) {
+        try {    
+            Thread.sleep(15000);
+            for (String dest : dests) {
+                System.out.println("Enviando mensagem com atraso para: " + dest);
+                sendMessage(dest, m);
+            }    
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
     }
 
     private void sendMessage(String dest, Message m) {
